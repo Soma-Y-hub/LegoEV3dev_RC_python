@@ -1,0 +1,155 @@
+EV3起動からのコマンドを全て記載して
+
+EV3を起動してから Androidラジコンを使うまでのコマンドを全部まとめます。
+（この順番でやれば動く形です）
+
+① EV3起動
+
+EV3の電源を入れる
+
+② PCからEV3にSSH接続
+
+PCのターミナルで
+
+ssh robot@ev3dev.local
+
+パスワード
+
+maker
+
+ログイン成功
+
+robot@ev3dev:~$
+③ Bluetooth状態リセット（重要）
+sudo rfcomm release all
+sudo pkill -f rfcomm
+sudo pkill -f rc_server.py
+
+Bluetoothサービス再起動
+
+sudo systemctl restart bluetooth
+④ Androidとペアリング（最初だけ）
+bluetoothctl
+
+中で
+
+power on
+agent on
+default-agent
+discoverable on
+pairable on
+scan on
+
+Androidが見える
+
+例
+
+NEW Device 18:18:8B:FD:8D:C3 A101FC
+
+ペアリング
+
+pair 18:18:8B:FD:8D:C3
+
+確認が出る
+
+Confirm passkey XXXXX
+
+入力
+
+yes
+
+成功
+
+Pairing successful
+
+信頼設定
+
+trust 18:18:8B:FD:8D:C3
+
+終了
+
+quit
+
+※これは 最初の1回だけ
+
+⑤ EV3ラジコンサーバ起動
+sudo rfcomm watch hci0 1 python3 ~/Lego_ev3_dev/rc_server.py {}
+
+成功状態
+
+Waiting for connection on channel 1
+⑥ Androidアプリ起動
+
+スマホで
+
+EV3ラジコンアプリ
+
+を起動
+
+⑦ 接続
+
+アプリの
+
+接続
+
+ボタン
+
+⑧ EV3側ログ
+
+成功すると
+
+Connection from ...
+Open RFCOMM device: /dev/rfcomm0
+Connected. Waiting for commands: F/B/L/R/S
+⑨ 操作
+
+Androidボタン
+
+ボタン	送信
+前進	F
+後退	B
+左	L
+右	R
+停止	S
+
+EV3ログ
+
+CMD: FORWARD
+CMD: LEFT
+CMD: STOP
+毎回やるコマンド（重要）
+
+EV3起動後は基本これだけでOKです
+
+ssh robot@ev3dev.local
+sudo rfcomm release all
+sudo rfcomm watch hci0 1 python3 ~/Lego_ev3_dev/rc_server.py {}
+よくあるエラーと対処
+Address already in use
+sudo rfcomm release all
+sudo pkill -f rfcomm
+Broken pipe
+
+EV3側サーバ再起動
+
+sudo rfcomm watch hci0 1 python3 ~/Lego_ev3_dev/rc_server.py {}
+ここまで完成すると
+
+Android → Bluetooth → EV3 → モーター
+
+が完全に動きます。
+
+もし希望あれば次に
+EV3ラジコンを一気に完成形にする改良を出せます。
+
+例えば
+
+スライダーで速度変更
+
+長押しで前進
+
+離したら停止
+
+カメラ付きEV3ラジコン
+
+などです。
